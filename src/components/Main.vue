@@ -199,8 +199,19 @@ export default {
             msg: "查看更多地区",
             flag: true,
             classA: 'container',
-            expanded: false
+            expanded: false,
+            newslist:[]
         }
+    },
+    created () {
+        this.$axios.get('http://api.tianapi.com/txapi/ncovcity/index?key=99010f95ded4b1cfc47129c42f8904f9')
+        .then(res=>{
+            console.log(res);
+            this.newslist = res.data.newslist;
+        })
+        .catch(res=>{
+
+        })
     },
     mounted(){
         var myChart = echarts.init(document.getElementById("map"));
