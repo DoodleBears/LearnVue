@@ -41,7 +41,7 @@
         <div id="map" style="width:100%; height: 400px;"></div>
 
         <!--表格-->
-        <div :class="[flag ? classA : '']">
+        <div>
             <div class="row">
                 <div class="column">地区</div>
                 <div class="column">确诊</div>
@@ -49,16 +49,28 @@
                 <div class="column">治愈</div>
             </div>
 
-            <div class="row bg-gray">
-                <div class="column">香港</div>
-                <div class="column">914</div>
-                <div class="column">4</div>
-                <div class="column">216
-                    <font-awesome-icon :icon="['fas','caret-down']" />
+            <div v-for="item in showlist">
+                <div class="row bg-gray" @click="toggleCity(item)" >
+                    <div class="column">{{item.provinceShortName}}</div>
+                    <div class="column">{{item.confirmedCount}}</div>
+                    <div class="column">{{item.deadCount}}</div>
+                    <div class="column">{{item.curedCount}}
+                        <font-awesome-icon :icon="['fas','caret-down']" v-if="!item.expanded" />
+                        <font-awesome-icon :icon="['fas','caret-up']" v-if="item.expanded" />
+                    </div>
+                </div>
+                <div class="cities" v-if="item.expanded">
+                    <div class="row gray" v-for="city in item.cities">
+                        <div class="column">{{city.cityName}}</div>
+                        <div class="column">{{city.confirmedCount}}</div>
+                        <div class="column">{{city.deadCount}}</div>
+                        <div class="column">{{city.curedCount}}</div>
+                    </div>
                 </div>
             </div>
+            
 
-            <div class="row bg-gray" @click="toggleCity">
+            <!-- <div class="row bg-gray" @click="toggleCity">
                 <div class="column">湖北</div>
                 <div class="column">67803</div>
                 <div class="column">3212</div>
@@ -74,109 +86,9 @@
                     <div class="column">2571</div>
                     <div class="column">46863</div>
                 </div>
-                <div class="row gray">
-                    <div class="column">武汉2</div>
-                    <div class="column">50008</div>
-                    <div class="column">2571</div>
-                    <div class="column">46863</div>
-                </div>
-                <div class="row gray">
-                    <div class="column">武汉3</div>
-                    <div class="column">50008</div>
-                    <div class="column">2571</div>
-                    <div class="column">46863</div>
-                </div>
-            </div>
+            </div> -->
 
-            <div class="row bg-gray" @click="toggleCity">
-                <div class="column">上海</div>
-                <div class="column">67803</div>
-                <div class="column">3212</div>
-                <div class="column">64014</div>
-            </div>
-            <div class="cities">
-                <div class="row gray">
-                    <div class="column">上海1</div>
-                    <div class="column">50008</div>
-                    <div class="column">2571</div>
-                    <div class="column">46863</div>
-                </div>
-                <div class="row gray">
-                    <div class="column">上海2</div>
-                    <div class="column">50008</div>
-                    <div class="column">2571</div>
-                    <div class="column">46863</div>
-                </div>
-                <div class="row gray">
-                    <div class="column">上海3</div>
-                    <div class="column">50008</div>
-                    <div class="column">2571</div>
-                    <div class="column">46863</div>
-                </div>
-            </div>
-
-            <div class="row bg-gray">
-                <div class="column">湖北</div>
-                <div class="column">67803</div>
-                <div class="column">3212</div>
-                <div class="column">64014</div>
-            </div>
-
-            <div class="row bg-gray">
-                <div class="column">湖北</div>
-                <div class="column">67803</div>
-                <div class="column">3212</div>
-                <div class="column">64014</div>
-            </div>
-
-            <div class="row bg-gray">
-                <div class="column">广东</div>
-                <div class="column">67803</div>
-                <div class="column">3212</div>
-                <div class="column">64014</div>
-            </div>
-
-            <div class="row bg-gray">
-                <div class="column">湖北</div>
-                <div class="column">67803</div>
-                <div class="column">3212</div>
-                <div class="column">64014</div>
-            </div>
-
-            <div class="row bg-gray">
-                <div class="column">湖北</div>
-                <div class="column">67803</div>
-                <div class="column">3212</div>
-                <div class="column">64014</div>
-            </div>
-
-            <div class="row bg-gray">
-                <div class="column">湖北</div>
-                <div class="column">67803</div>
-                <div class="column">3212</div>
-                <div class="column">64014</div>
-            </div>
-
-            <div class="row bg-gray">
-                <div class="column">湖北</div>
-                <div class="column">67803</div>
-                <div class="column">3212</div>
-                <div class="column">64014</div>
-            </div>
-
-            <div class="row bg-gray">
-                <div class="column">湖北</div>
-                <div class="column">67803</div>
-                <div class="column">3212</div>
-                <div class="column">64014</div>
-            </div>
-
-            <div class="row bg-gray">
-                <div class="column">湖北2</div>
-                <div class="column">67803</div>
-                <div class="column">3212</div>
-                <div class="column">64014</div>
-            </div>
+            
 
         </div>
 
@@ -198,9 +110,8 @@ export default {
         return {
             msg: "查看更多地区",
             flag: true,
-            classA: 'container',
-            expanded: false,
-            newslist:[]
+            newslist:[],
+            showlist:[]
         }
     },
     created () {
@@ -208,53 +119,65 @@ export default {
         .then(res=>{
             console.log(res);
             this.newslist = res.data.newslist;
+            this.showlist = this.newslist.slice(0,6);
+            var maplist = [];
+            for(var i = 0; i < this.newslist.length; i++)
+            {
+                var obj = {};
+                obj.name = this.newslist[i].provinceShortName;
+                obj.value = this.newslist[i].confirmedCount;
+
+                maplist.push(obj);
+            }
+            var myChart = echarts.init(document.getElementById("map"));
+
+            var option = {
+                tooltip: {
+                    trigger: 'item'
+                },
+                //左侧小导航图标
+                visualMap: {  
+                    show : true,  
+                    x: 'left',  
+                    y: 'bottom',
+                    textStyle:{
+                        
+                    },
+                    splitList: [
+                        {start: 1000},{start: 500, end: 999},{start: 100, end: 499},
+                        {start: 10, end: 99},{start: 1, end: 9},
+                    ],  
+                    color: ['#cc0000', '#ff4d4d', '#ff9999','#ffe5e5']
+                },  
+                //配置属性
+                series:[{
+                    name: '中国疫情地图',
+                    type: 'map',
+                    mapType: 'china',
+                    label: {
+                        normal: {
+                            show: true, //默认显示省份名称
+                            fontSize: 8
+                        },
+                        emphasis: {
+                            show: true
+                        }
+                    },
+                    data:maplist
+                }]
+            };
+
+            myChart.setOption(option);
+
         })
         .catch(res=>{
 
         })
     },
     mounted(){
-        var myChart = echarts.init(document.getElementById("map"));
 
-        var mydata = [{"name":"\u9999\u6e2f","value":3397},{"name":"\u65b0\u7586","value":639},{"name":"\u8fbd\u5b81","value":241},{"name":"\u53f0\u6e7e","value":467},{"name":"\u5e7f\u4e1c","value":1680},{"name":"\u4e0a\u6d77","value":748},{"name":"\u5185\u8499\u53e4","value":258},{"name":"\u5317\u4eac","value":933},{"name":"\u5c71\u4e1c","value":799},{"name":"\u5929\u6d25","value":205},{"name":"\u56db\u5ddd","value":604},{"name":"\u9655\u897f","value":324},{"name":"\u798f\u5efa","value":366},{"name":"\u4e91\u5357","value":191},{"name":"\u5409\u6797","value":157},{"name":"\u6d59\u6c5f","value":1270},{"name":"\u6c5f\u82cf","value":655},{"name":"\u6e56\u5317","value":68135},{"name":"\u6cb3\u5357","value":1276},{"name":"\u6e56\u5357","value":1019},{"name":"\u5b89\u5fbd","value":991},{"name":"\u9ed1\u9f99\u6c5f","value":947},{"name":"\u6c5f\u897f","value":932},{"name":"\u91cd\u5e86","value":583},{"name":"\u6cb3\u5317","value":349},{"name":"\u5e7f\u897f","value":255},{"name":"\u5c71\u897f","value":201},{"name":"\u6d77\u5357","value":171},{"name":"\u7518\u8083","value":167},{"name":"\u8d35\u5dde","value":147},{"name":"\u5b81\u590f","value":75},{"name":"\u6fb3\u95e8","value":46},{"name":"\u9752\u6d77","value":18},{"name":"\u897f\u85cf","value":1}];
+        
 
-        var option = {
-            tooltip: {
-                trigger: 'item'
-            },
-            //左侧小导航图标
-            visualMap: {  
-                show : true,  
-                x: 'left',  
-                y: 'bottom',
-                textStyle:{
-                    
-                },
-                splitList: [
-                    {start: 1000},{start: 500, end: 999},{start: 100, end: 499},
-                    {start: 10, end: 99},{start: 1, end: 9},
-                ],  
-                color: ['#cc0000', '#ff4d4d', '#ff9999','#ffe5e5']
-            },  
-            //配置属性
-            series:[{
-                name: '中国疫情地图',
-                type: 'map',
-                mapType: 'china',
-                label: {
-                    normal: {
-                        show: true, //默认显示省份名称
-                        fontSize: 8
-                    },
-                    emphasis: {
-                        show: true
-                    }
-                },
-                data:mydata
-            }]
-        };
-
-        myChart.setOption(option);
 
         var myChart2 = echarts.init(document.getElementById('bar'));
 
@@ -415,30 +338,32 @@ export default {
 
     },
     methods:{
-        toggleCity(e) {
-            console.log(e);
-            var column = e.target;
-            var row = column.parentElement; //原生js
-            //row = e.path[1]; // 获得当前 element的爸爸，path是一个array，存当前element的祖宗
-            console.log(row);
-            var cities = row.nextElementSibling;
-            console.log(cities);
+        toggleCity(item) {
+            console.log(item);
+            // var column = item.target;
+            // var row = column.parentElement; //原生js
+            // //row = item.path[1]; // 获得当前 element的爸爸，path是一个array，存当前element的祖宗
+            // //console.log(row);
+            // var cities = row.nextElementSibling;
+            //console.log(cities);
             //设置元素的 display 属性
-            if (cities.style.display == "block") {
-                cities.style.display = "none";
-            }
-            else {
-                cities.style.display = "block";
-            }
-            this.expanded = !this.expanded;
-            
+            // if (cities.style.display == "block") {
+            //     cities.style.display = "none";
+            // }
+            // else {
+            //     cities.style.display = "block";
+            // }
+            // item.expanded = !item.expanded;
+            this.$set(item, "expanded", !item.expanded)
         },
         toggleData() {
             if (this.flag) {
                 this.msg = "收起更多地区";
+                this.showlist = this.newslist;
             }
             else {
                 this.msg = "查看更多地区";
+                this.showlist = this.newslist.slice(0, 6);
             }
             this.flag = !this.flag;
             console.log(this.msg);
@@ -448,10 +373,10 @@ export default {
 </script>
 
 <style scoped>
-    .cities 
+    /* .cities 
     {
         display: none;
-    }
+    } */
     .container 
     {
         height: 455px;
